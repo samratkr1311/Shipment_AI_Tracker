@@ -1,0 +1,100 @@
+managed implementation in class zbp_i_shipment_track unique;
+strict ( 2 );
+with draft;
+define behavior for ZI_SHIPMENT_TRACK alias Shipment
+persistent table zshipment_header
+draft table zdr_shipment_hea
+lock master
+total etag ShipmentId
+authorization master ( instance )
+//etag master <field_name>
+early numbering
+{
+  field ( readonly ) ShipmentId;
+  create ( authorization : global );
+  update;
+  delete;
+
+
+  association _Prediction { create; with draft; }
+  association _TrackerEvent { create; with draft; }
+
+  draft action Edit;
+  draft action Activate optimized;
+  draft action Discard;
+  draft action Resume;
+  draft determine action Prepare;
+
+  determination ship_event_type on modify { field ShipmentType; }
+
+  determination calculate_delay_risk on modify { field DelayRisk; }
+
+  side effects { field EtaDays affects $self; }
+
+  action ai_preview result [1] $self;
+
+  mapping for zshipment_header
+    {
+      AiSummary           = ai_summary;
+      CreateBy            = create_by;
+      CreatedAt           = created_at;
+      CurrentStatus       = current_status;
+      DelayHours          = delay_hours;
+      DelayRisk           = delay_risk;
+      DestinationLocation = destination_location;
+      DistanceKm          = distance_km;
+      EtaDays             = eta_days;
+      OriginLocation      = origin_location;
+      ShipmentId          = shipment_id;
+      ShipmentType        = shipment_type;
+      UpdatedAt           = updated_at;
+    }
+}
+
+define behavior for ZI_PREDCTIONLOG alias Prediction
+persistent table zai_predctionlog
+draft table zdr_ai_predction
+lock dependent by _Prediction
+authorization dependent by _Prediction
+//etag master <field_name>
+{
+  update;
+  delete;
+  field ( readonly ) RequestId, ShipmentId;
+  association _Prediction { with draft; }
+
+  mapping for zai_predctionlog
+    {
+      AiActionType  = ai_action_type;
+      AiResponse    = ai_response;
+      CalledAt      = called_at;
+      InputSnapshot = input_snapshot;
+      RequestId     = request_id;
+      ShipmentId    = shipment_id;
+    }
+
+}
+
+define behavior for ZI_SHIP_TRACKEVENT alias Tracker
+persistent table zship_trackevent
+draft table zdr_ship_track
+lock dependent by _Shipment
+authorization dependent by _Shipment
+//etag master <field_name>
+early numbering
+{
+  update;
+  delete;
+  field ( readonly ) EventId, ShipmentId;
+  association _Shipment { with draft; }
+
+  mapping for zship_trackevent
+    {
+      EventId       = event_id;
+      EventLocation = event_location;
+      EventTime     = event_time;
+      EventType     = event_type;
+      Remarks       = remarks;
+      ShipmentId    = shipment_id;
+    }
+}

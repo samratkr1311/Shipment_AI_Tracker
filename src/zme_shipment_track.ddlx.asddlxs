@@ -1,0 +1,90 @@
+@Metadata.layer: #CORE
+@Search.searchable: true // 07-01
+@UI.headerInfo: {
+    typeName: 'Shipment',
+    typeNamePlural: 'Shipments',
+    typeImageUrl: 'sap-icon://flight',
+    title: {
+        type: #STANDARD,
+        label: 'Shipment',
+        iconUrl: 'sap-icon://shipping-status'
+    }
+}
+annotate view ZC_SHIPMENT_TRACK with
+{
+  @UI.facet: [
+    {
+      id: 'Shipment',
+      purpose: #STANDARD,
+      type: #IDENTIFICATION_REFERENCE,
+      label: 'Shipments',
+      position: 10
+    },
+        {
+      id: 'TrackingCollection',
+      position: 20,
+      type: #COLLECTION,
+      label: 'Tracking'
+    },
+        {
+      id: 'TrackingItems',
+      type: #LINEITEM_REFERENCE,
+      parentId: 'TrackingCollection',
+      targetElement: '_TrackerEvent'
+    },
+
+            {
+      id: 'PredictionCollection',
+      position: 30,
+      type: #COLLECTION,
+      label: 'Prediction'
+    },
+        {
+      id: 'Prediction',
+      type: #LINEITEM_REFERENCE,
+      label: 'Prediction',
+      position: 30,
+      parentId: 'PredictionCollection',
+      targetElement: '_Prediction'
+    }
+
+    ]
+
+  @Search.defaultSearchElement: true
+  @UI.lineItem: [{ position: 10, label: 'Shipment ID', importance: #HIGH }]
+  @UI.identification: [{ position: 10, label: 'Shipment ID', importance: #HIGH }]
+  ShipmentId;
+  @Search.defaultSearchElement: true
+  @UI.lineItem: [{ position: 20, label: 'Shipment Type', importance: #HIGH }]
+  @UI.identification: [{ position: 20, label: 'Shipment Type', importance: #HIGH }]
+  @Consumption.valueHelpDefinition: [{ entity:{ name: 'ZI_DOM_SHPT_TYPE', element: 'Value' }}]
+  // distinctValues: true,
+  // additionalBinding: [{ localElement: 'ShpTDesc', element: 'Description',usage: #FILTER_AND_RESULT }] }]
+  ShipmentType;
+  @Search.defaultSearchElement: true
+  @UI.lineItem: [{ position: 30, label: 'Original', importance: #HIGH }]
+  @UI.identification: [{ position: 30, label: 'Origin', importance: #HIGH }]
+  @Consumption.valueHelpDefinition: [{ entity:{ name: 'ZI_COUNTRY', element: 'Country' }}]
+  OriginLocation;
+  @Search.defaultSearchElement: true
+  @UI.lineItem: [{ position: 40, label: 'Destination', importance: #HIGH }]
+  @UI.identification: [{ position: 40, label: 'Destination', importance: #HIGH }]
+  @Consumption.valueHelpDefinition: [{ entity:{ name: 'ZI_COUNTRY', element: 'Country' }}]
+  DestinationLocation;
+  @UI.lineItem: [{ position: 50, label: 'Status', importance: #HIGH }]
+  @UI.identification: [{ position: 50, label: 'Status', importance: #HIGH }]
+  @Consumption.valueHelpDefinition: [{ entity:{ name: 'ZI_STATUS_CHECK', element: 'Value' }}]
+  CurrentStatus;
+  @Search.defaultSearchElement: true
+  @UI.lineItem: [{ position: 60, label: 'Delay Risk', importance: #HIGH }]
+  @UI.identification: [{ position: 60, label: 'Delay Risk', importance: #HIGH }]
+  DelayRisk;
+  @UI.lineItem: [{ position: 70, label: 'ETA (Days)', importance: #HIGH }]
+  @UI.identification: [{ position: 70, label: 'ETA (Days)', importance: #HIGH }]
+  EtaDays;
+  @UI.lineItem: [{ position: 80, label: 'Delay Hours', importance: #HIGH }]
+  @UI.identification: [{ position: 80, label: 'Delay Hours', importance: #HIGH }]
+  DelayHours;
+
+
+}

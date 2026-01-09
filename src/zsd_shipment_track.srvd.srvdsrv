@@ -1,0 +1,6 @@
+@EndUserText.label: 'SD'
+define service ZSD_SHIPMENT_TRACK {
+  expose ZC_SHIPMENT_TRACK;
+  expose ZC_SHIP_TRACKEVENT;
+  expose ZC_PREDCTIONLOG;
+}

@@ -1,0 +1,5 @@
+CLASS zbp_i_shipment_track DEFINITION PUBLIC ABSTRACT FINAL FOR BEHAVIOR OF zi_shipment_track.
+ENDCLASS.
+
+CLASS zbp_i_shipment_track IMPLEMENTATION.
+ENDCLASS.

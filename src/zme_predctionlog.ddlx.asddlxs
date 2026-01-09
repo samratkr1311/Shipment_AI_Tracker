@@ -1,0 +1,42 @@
+@Metadata.layer: #CORE
+@UI.headerInfo: {
+    typeName: 'Prediction',
+    typeNamePlural: 'Prediction',
+    typeImageUrl: 'sap-icon://shipping-status',
+    title: {
+        type: #STANDARD,
+        label: 'Prediction',
+        iconUrl: 'sap-icon://shipping-status'
+    }
+    }
+annotate view ZC_PREDCTIONLOG with
+{
+
+  @UI.facet: [
+    {
+      id: 'Prediction',
+      purpose: #STANDARD,
+      type: #IDENTIFICATION_REFERENCE,
+      label: 'Prediction',
+      position: 30
+    }]
+  @UI.lineItem: [{ position: 10 }]
+  @UI.identification: [{ position: 10 , label: 'Request Id'  }]
+  RequestId;
+  @UI.lineItem: [{ position: 20 }]
+  @UI.identification: [{ position: 20 , label: 'Shipment Id'  }]
+  ShipmentId;
+  @UI.lineItem: [{ position: 30 }]
+  @UI.identification: [{ position: 30 , label: 'Action Type'  }]
+  AiActionType;
+  @UI.lineItem: [{ position: 40 }]
+  @UI.identification: [{ position: 40 , label: 'Snapshot'  }]
+  InputSnapshot;
+  @UI.lineItem: [{ position: 50 }]
+  @UI.identification: [{ position: 50 , label: 'Response'  }]
+  AiResponse;
+  @UI.lineItem: [{ position: 60 }]
+  @UI.identification: [{ position: 60 , label: 'Called At'  }]
+  CalledAt;
+
+}
