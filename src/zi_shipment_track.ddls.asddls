@@ -7,8 +7,8 @@ define root view entity ZI_SHIPMENT_TRACK
   composition [0..*] of ZI_SHIP_TRACKEVENT as _TrackerEvent
 
   composition [0..*] of ZI_PREDCTIONLOG    as _Prediction
-  association to ZI_DOM_SHPT_TYPE as _Shptype on $projection.ShipmentType = _Shptype.Description
-  association to ZI_COUNTRY as _Country on $projection.OriginLocation = _Country.Country
+  association to ZI_DOM_SHPT_TYPE          as _Shptype on $projection.ShipmentType = _Shptype.Description
+  association to ZI_COUNTRY                as _Country on $projection.OriginLocation = _Country.Country
 {
 
   key shipment_id          as ShipmentId,
@@ -20,6 +20,7 @@ define root view entity ZI_SHIPMENT_TRACK
       eta_days             as EtaDays,
       delay_hours          as DelayHours,
       delay_risk           as DelayRisk,
+      delay_risk_crit      as DelayRiskCrit, 
       ai_summary           as AiSummary,
       create_by            as CreateBy,
       created_at           as CreatedAt,
@@ -28,6 +29,6 @@ define root view entity ZI_SHIPMENT_TRACK
       _Prediction,
       _Shptype,
       _Country
-//      _Shptype.Description as ShpTDesc
+      //      _Shptype.Description as ShpTDesc
 
 }

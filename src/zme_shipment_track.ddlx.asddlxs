@@ -7,8 +7,12 @@
     title: {
         type: #STANDARD,
         label: 'Shipment',
+        value: 'ShipmentId',
         iconUrl: 'sap-icon://shipping-status'
-    }
+    },
+    description: {
+         value: 'CurrentStatus'
+           }
 }
 annotate view ZC_SHIPMENT_TRACK with
 {
@@ -46,8 +50,14 @@ annotate view ZC_SHIPMENT_TRACK with
       position: 30,
       parentId: 'PredictionCollection',
       targetElement: '_Prediction'
+    },
+    {
+      id: 'KPI_HEADER',
+      type: #FIELDGROUP_REFERENCE,
+      purpose: #HEADER,
+      label: 'Overview',
+      targetQualifier: 'KPI_GROUP'
     }
-
     ]
 
   @Search.defaultSearchElement: true
@@ -76,15 +86,22 @@ annotate view ZC_SHIPMENT_TRACK with
   @Consumption.valueHelpDefinition: [{ entity:{ name: 'ZI_STATUS_CHECK', element: 'Value' }}]
   CurrentStatus;
   @Search.defaultSearchElement: true
-  @UI.lineItem: [{ position: 60, label: 'Delay Risk', importance: #HIGH }]
+  @UI.dataPoint: { title: 'Delay Risk',
+                 criticality: 'DelayRisk' }
+  @UI.lineItem: [{ position: 60, label: 'Delay Risk', importance: #HIGH, criticality: 'DelayRiskCrit' }]
   @UI.identification: [{ position: 60, label: 'Delay Risk', importance: #HIGH }]
   DelayRisk;
+  @UI.fieldGroup: [
+   { qualifier: 'KPI_GROUP', position: 10, label: 'ETA (Days)' }
+  ]
   @UI.lineItem: [{ position: 70, label: 'ETA (Days)', importance: #HIGH }]
   @UI.identification: [{ position: 70, label: 'ETA (Days)', importance: #HIGH }]
   EtaDays;
+
+  @UI.fieldGroup: [
+    { qualifier: 'KPI_GROUP', position: 20, label: 'Delay Hours' }
+  ]
   @UI.lineItem: [{ position: 80, label: 'Delay Hours', importance: #HIGH }]
   @UI.identification: [{ position: 80, label: 'Delay Hours', importance: #HIGH }]
   DelayHours;
-
-
 }

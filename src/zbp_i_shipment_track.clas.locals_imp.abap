@@ -12,6 +12,7 @@ CLASS lhc_Shipment DEFINITION INHERITING FROM cl_abap_behavior_handler.
 
     METHODS ai_preview FOR MODIFY
       IMPORTING keys FOR ACTION Shipment~ai_preview RESULT result.
+
     METHODS calculate_delay_risk FOR DETERMINE ON MODIFY
       IMPORTING keys FOR Shipment~calculate_delay_risk.
 
@@ -222,51 +223,56 @@ CLASS lhc_Shipment IMPLEMENTATION.
 
   ENDMETHOD.
 
- METHOD calculate_delay_risk.
+  METHOD calculate_delay_risk.
 
-  DATA : lt_update   TYPE TABLE FOR UPDATE zi_shipment_track,
-         lv_new_risk TYPE zi_shipment_track-delayrisk.
+    DATA : lt_update   TYPE TABLE FOR UPDATE zi_shipment_track,
+           lv_new_risk TYPE zi_shipment_track-delayrisk.
 
-  READ ENTITIES OF zi_shipment_track
-    IN LOCAL MODE
-    ENTITY Shipment
-    FIELDS ( DelayHours DelayRisk )
-    WITH CORRESPONDING #( keys )
-    RESULT DATA(shipments).
-
-  LOOP AT shipments ASSIGNING FIELD-SYMBOL(<s>).
-
-    " 1️⃣ Calculate new risk
-    IF <s>-delayhours IS INITIAL.
-      lv_new_risk = 'GREEN'.
-    ELSEIF <s>-delayhours <= 4.
-      lv_new_risk = 'ORANGE'.
-    ELSE.
-      lv_new_risk = 'RED'.
-    ENDIF.
-
-    " 2️⃣ Update ONLY if value really changed
-    IF lv_new_risk <> <s>-delayrisk.
-      APPEND VALUE #(
-        %tky      = <s>-%tky
-        delayrisk = lv_new_risk
-      ) TO lt_update.
-    ENDIF.
-
-  ENDLOOP.
-
-  " 3️⃣ Perform update only when needed
-  IF lt_update IS NOT INITIAL.
-    MODIFY ENTITIES OF zi_shipment_track
+    READ ENTITIES OF zi_shipment_track
       IN LOCAL MODE
       ENTITY Shipment
-      UPDATE FIELDS ( DelayRisk )
-      WITH lt_update
-      FAILED   DATA(lt_failed)
-      REPORTED DATA(lt_reported).
-  ENDIF.
+      FIELDS ( DelayHours DelayRisk )
+      WITH CORRESPONDING #( keys )
+      RESULT DATA(shipments).
 
-ENDMETHOD.
+    LOOP AT shipments ASSIGNING FIELD-SYMBOL(<s>).
+
+      DATA(lv_risk) = <s>-DelayRisk.
+      DATA(lv_crit) = <s>-DelayRiskCrit.
+
+      IF <s>-DelayHours IS INITIAL OR <s>-DelayHours <= 8.
+        lv_risk = 'ON_TRACK'.
+        lv_crit = 3. " GREEN
+      ELSEIF <s>-DelayHours <= 24.
+        lv_risk = 'AT_RISK'.
+        lv_crit = 2. " YELLOW
+      ELSE.
+        lv_risk = 'DELAYED'.
+        lv_crit = 1. " RED
+      ENDIF.
+
+      IF lv_risk <> <s>-DelayRisk OR lv_crit <> <s>-DelayRiskCrit.
+        APPEND VALUE #(
+          %tky          = <s>-%tky
+          DelayRisk     = lv_risk
+          DelayRiskCrit = lv_crit
+        ) TO lt_update.
+      ENDIF.
+
+    ENDLOOP.
+
+    " 3️⃣ Perform update only when needed
+    IF lt_update IS NOT INITIAL.
+      MODIFY ENTITIES OF zi_shipment_track
+        IN LOCAL MODE
+        ENTITY Shipment
+        UPDATE FIELDS ( DelayRisk )
+        WITH lt_update
+        FAILED   DATA(lt_failed)
+        REPORTED DATA(lt_reported).
+    ENDIF.
+
+  ENDMETHOD.
 
 
 ENDCLASS.

@@ -11,7 +11,6 @@
     }
 annotate view ZC_SHIP_TRACKEVENT with
 {
-
   @UI.facet: [
     {
       id: 'Tracking',
@@ -21,23 +20,23 @@ annotate view ZC_SHIP_TRACKEVENT with
       position: 10
     }]
 
-  @UI.lineItem: [{ position: 10 }]
-  @UI.identification: [{ position: 10 , label: 'Event Id'  }]
+  @UI.lineItem: [{ position: 10 ,iconUrl: 'sap-icon://shipping-status' }]
+  @UI.identification: [{ position: 10 , label: 'Event Id',iconUrl: 'sap-icon://shipping-status'  }]
   EventId;
 
-  @UI.lineItem: [{ position: 20 }]
-  @UI.identification: [{ position: 20, label: 'Event Type'  }]
+  @UI.lineItem: [{ position: 20,iconUrl: 'sap-icon://shipping-status' }]
+  @UI.identification: [{ position: 20, label: 'Event Type',iconUrl: 'sap-icon://shipping-status'  }]
   EventType;
 
-  @UI.lineItem: [{ position: 30 }]
-  @UI.identification: [{ position: 30 , label: 'Location' }]
+  @UI.lineItem: [{ position: 30,iconUrl: 'sap-icon://map-fill' }]
+  @UI.identification: [{ position: 30 , label: 'Location',iconUrl: 'sap-icon://map-fill' }]
   EventLocation;
 
-  @UI.lineItem: [{ position: 40 }]
-  @UI.identification: [{ position: 40 , label: 'Time' }]
+  @UI.lineItem: [{ position: 40 ,iconUrl: 'sap-icon://time-entry-request'}]
+  @UI.identification: [{ position: 40 , label: 'Time',iconUrl: 'sap-icon://time-entry-request' }]
   EventTime;
 
-  @UI.lineItem: [{ position: 50 }]
-  @UI.identification: [{ position: 50 , label: 'Remarks' }]
+  @UI.lineItem: [{ position: 50 ,iconUrl: 'sap-icon://notes' }]
+  @UI.identification: [{ position: 50 , label: 'Remarks',iconUrl: 'sap-icon://notes' }]
   Remarks;
 }

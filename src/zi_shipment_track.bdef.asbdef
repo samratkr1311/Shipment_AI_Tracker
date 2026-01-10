@@ -27,9 +27,9 @@ early numbering
 
   determination ship_event_type on modify { field ShipmentType; }
 
-  determination calculate_delay_risk on modify { field DelayRisk; }
+  determination calculate_delay_risk on modify { field DelayHours; }
 
-  side effects { field EtaDays affects $self; }
+  side effects { field EtaDays affects field DistanceKm; }
 
   action ai_preview result [1] $self;
 
@@ -41,6 +41,7 @@ early numbering
       CurrentStatus       = current_status;
       DelayHours          = delay_hours;
       DelayRisk           = delay_risk;
+      DelayRiskCrit       = delay_risk_crit;
       DestinationLocation = destination_location;
       DistanceKm          = distance_km;
       EtaDays             = eta_days;

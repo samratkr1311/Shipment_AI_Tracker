@@ -15,6 +15,7 @@ define root view entity ZC_SHIPMENT_TRACK
       EtaDays,
       DelayHours,
       DelayRisk,
+      DelayRiskCrit,
       AiSummary,
       CreateBy,
       CreatedAt,
