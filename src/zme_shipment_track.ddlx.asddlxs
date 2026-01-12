@@ -62,7 +62,8 @@ annotate view ZC_SHIPMENT_TRACK with
 
   @Search.defaultSearchElement: true
   @UI.lineItem: [{ position: 10, label: 'Shipment ID', importance: #HIGH }]
-  @UI.identification: [{ position: 10, label: 'Shipment ID', importance: #HIGH }]
+  @UI.identification: [{ position: 10, label: 'Shipment ID', importance: #HIGH },
+                        { type: #FOR_ACTION , dataAction: 'ai_preview', label: 'AI Delay Prediction' }]
   ShipmentId;
   @Search.defaultSearchElement: true
   @UI.lineItem: [{ position: 20, label: 'Shipment Type', importance: #HIGH }]
@@ -104,4 +105,7 @@ annotate view ZC_SHIPMENT_TRACK with
   @UI.lineItem: [{ position: 80, label: 'Delay Hours', importance: #HIGH }]
   @UI.identification: [{ position: 80, label: 'Delay Hours', importance: #HIGH }]
   DelayHours;
+  @UI.lineItem: [{ position: 90, label: 'AI Preview', importance: #HIGH }]
+  @UI.identification: [{ position: 90, label: 'AI Preview', importance: #HIGH }]
+  AiSummary;
 }

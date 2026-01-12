@@ -11,7 +11,7 @@ CLASS lhc_Shipment DEFINITION INHERITING FROM cl_abap_behavior_handler.
       IMPORTING keys FOR Shipment~ship_event_type.
 
     METHODS ai_preview FOR MODIFY
-      IMPORTING keys FOR ACTION Shipment~ai_preview RESULT result.
+      IMPORTING keys FOR ACTION Shipment~ai_preview.
 
     METHODS calculate_delay_risk FOR DETERMINE ON MODIFY
       IMPORTING keys FOR Shipment~calculate_delay_risk.
@@ -21,6 +21,9 @@ CLASS lhc_Shipment DEFINITION INHERITING FROM cl_abap_behavior_handler.
 
     METHODS earlynumbering_cba_Trackereven FOR NUMBERING
       IMPORTING entities FOR CREATE Shipment\_Trackerevent.
+
+    METHODS earlynumbering_cba_Prediction FOR NUMBERING
+      IMPORTING entites FOR CREATE Shipment\_Prediction.
 
 ENDCLASS.
 
@@ -221,7 +224,59 @@ CLASS lhc_Shipment IMPLEMENTATION.
 
   METHOD ai_preview.
 
+    DATA:
+      lt_update TYPE TABLE FOR UPDATE zi_shipment_track,
+      "      lt_result TYPE TABLE FOR ACTION RESULT zi_shipment_track~ai_preview,
+      lt_pred   TYPE TABLE FOR CREATE zi_shipment_track\_Prediction.
+
+    READ ENTITIES OF zi_shipment_track
+      IN LOCAL MODE
+      ENTITY Shipment
+      ALL FIELDS
+      WITH CORRESPONDING #( keys )
+      RESULT DATA(lt_shipments).
+
+    LOOP AT lt_shipments ASSIGNING FIELD-SYMBOL(<s>).
+
+      DATA lv_summary TYPE char256.
+
+      CASE <s>-CurrentStatus.
+        WHEN 'Delay'.
+          lv_summary = |Predicted Delay: 3 Days. Check transport conditions.|.
+        WHEN 'OnTime'.
+          lv_summary = |Shipment is on time. No delay expected.|.
+        WHEN OTHERS.
+          lv_summary = |AI Prediction not available yet.|.
+      ENDCASE.
+
+      " 1️⃣ Update shipment
+      APPEND VALUE #(
+        %tky      = <s>-%tky
+        AiSummary = lv_summary
+      ) TO lt_update.
+
+*      APPEND VALUE #(
+*        %tky = <s>-%tky
+*        %is_draft = abap_true
+*      ) TO lt_result.
+
+    ENDLOOP.
+
+    " 3️⃣ Update shipment AI summary
+    IF lt_update IS NOT INITIAL.
+      MODIFY ENTITIES OF zi_shipment_track
+        IN LOCAL MODE
+        ENTITY Shipment
+        UPDATE FIELDS ( AiSummary )
+        WITH lt_update
+        FAILED   DATA(lt_failed)
+        REPORTED DATA(lt_reported).
+    ENDIF.
+
+*    result = lt_result.
+
   ENDMETHOD.
+
 
   METHOD calculate_delay_risk.
 
@@ -274,5 +329,106 @@ CLASS lhc_Shipment IMPLEMENTATION.
 
   ENDMETHOD.
 
+
+  METHOD earlynumbering_cba_prediction.
+    DATA:lt_track_event TYPE TABLE FOR MAPPED EARLY zi_predctionlog,
+         ls_track_event LIKE LINE OF lt_track_event,
+         lr_need_tab    TYPE REF TO data,
+         lv_curr_num    TYPE n LENGTH 10.
+
+    FIELD-SYMBOLS:
+      <lt_need_number> TYPE STANDARD TABLE,
+      <ls_need_number> TYPE any.
+
+
+    LOOP AT entites ASSIGNING  FIELD-SYMBOL(<fs>).
+
+      IF lr_need_tab IS INITIAL.
+
+        CREATE DATA lr_need_tab LIKE <fs>-%target.
+        ASSIGN lr_need_tab->* TO <lt_need_number>.
+      ENDIF..
+
+      LOOP AT <fs>-%target ASSIGNING FIELD-SYMBOL(<ls_target>).
+
+        IF <ls_target>-RequestId IS INITIAL.
+
+          APPEND <ls_target> TO <lt_need_number>.
+        ELSE.
+
+          APPEND VALUE #( %cid = <ls_target>-%cid
+                          %key = <ls_target>-%key )  TO mapped-prediction.
+        ENDIF.
+
+      ENDLOOP.
+
+    ENDLOOP.
+
+
+    IF <lt_need_number> IS INITIAL.
+
+      RETURN.
+
+    ENDIF.
+
+
+*Get Number
+
+    TRY.
+        cl_numberrange_runtime=>number_get(
+          EXPORTING
+            object            = '/DMO/TRV_M'
+            nr_range_nr       = '01'
+            quantity          = CONV #( lines( <lt_need_number> ) )
+          IMPORTING
+            number            = DATA(lv_latest_num)
+            returned_quantity = DATA(lv_qty)
+        ).
+      CATCH cx_number_ranges INTO DATA(lo_error).
+
+        RETURN.
+    ENDTRY.
+
+    ASSERT lv_qty = lines( <lt_need_number> ).
+
+    lv_curr_num = lv_latest_num - lv_qty.
+    " 4️⃣ Assign numbers
+    LOOP AT <lt_need_number> ASSIGNING <ls_need_number>.
+
+      lv_curr_num = lv_curr_num + 1.
+
+      FIELD-SYMBOLS:
+        <cid>          TYPE any,
+        <is_draft>     TYPE any,
+        <aiactiontype> TYPE any,
+        <inputsnap>    TYPE any,
+        <airesponse>   TYPE any,
+        <calledat>     TYPE any.
+
+
+
+      ASSIGN COMPONENT '%cid'       OF STRUCTURE <ls_need_number> TO <cid>.
+      ASSIGN COMPONENT '%is_draft'  OF STRUCTURE <ls_need_number> TO <is_draft>.
+      ASSIGN COMPONENT 'aiactiontype'     OF STRUCTURE <ls_need_number> TO <aiactiontype>.
+      ASSIGN COMPONENT 'inputsnap'  OF STRUCTURE <ls_need_number> TO <inputsnap>.
+      ASSIGN COMPONENT 'airesponse' OF STRUCTURE <ls_need_number> TO <airesponse>.
+      ASSIGN COMPONENT 'calledat'  OF STRUCTURE <ls_need_number> TO <calledat>.
+
+
+      IF <cid> IS NOT ASSIGNED OR <is_draft> IS NOT ASSIGNED.
+        CONTINUE. " or report/failed for safety
+      ENDIF.
+
+      " Build mapped row for CHILD with final key
+      ls_track_event = VALUE #(
+        %cid       = <cid>
+        %is_draft  = <is_draft>
+        RequestId        = lv_curr_num
+      ).
+
+      APPEND ls_track_event TO mapped-prediction.
+
+    ENDLOOP.
+  ENDMETHOD.
 
 ENDCLASS.

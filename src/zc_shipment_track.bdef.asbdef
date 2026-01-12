@@ -13,9 +13,12 @@ define behavior for ZC_SHIPMENT_TRACK alias Shipment
   use action Discard;
   use action Resume;
   use action Prepare;
+  use action ai_preview;
 
   use association _Prediction { create; with draft; }
   use association _TrackerEvent { create; with draft; }
+
+//  action ai_preview result [1] $self;
 }
 
 define behavior for ZC_PREDCTIONLOG alias Prediction

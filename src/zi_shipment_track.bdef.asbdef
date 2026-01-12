@@ -29,9 +29,13 @@ early numbering
 
   determination calculate_delay_risk on modify { field DelayHours; }
 
-  side effects { field EtaDays affects field DistanceKm; }
 
-  action ai_preview result [1] $self;
+  action ai_preview;
+
+  side effects
+  {
+    action ai_preview affects field AiSummary;
+  }
 
   mapping for zshipment_header
     {
@@ -58,6 +62,7 @@ draft table zdr_ai_predction
 lock dependent by _Prediction
 authorization dependent by _Prediction
 //etag master <field_name>
+early numbering
 {
   update;
   delete;
