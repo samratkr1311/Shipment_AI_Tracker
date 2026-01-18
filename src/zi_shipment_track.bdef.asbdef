@@ -31,7 +31,7 @@ early numbering
 
 
   action ai_preview;
-
+  action ship_email;
   side effects
   {
     action ai_preview affects field AiSummary;

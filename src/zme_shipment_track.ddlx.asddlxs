@@ -63,7 +63,8 @@ annotate view ZC_SHIPMENT_TRACK with
   @Search.defaultSearchElement: true
   @UI.lineItem: [{ position: 10, label: 'Shipment ID', importance: #HIGH }]
   @UI.identification: [{ position: 10, label: 'Shipment ID', importance: #HIGH },
-                        { type: #FOR_ACTION , dataAction: 'ai_preview', label: 'AI Delay Prediction' }]
+                        { type: #FOR_ACTION , dataAction: 'ai_preview', label: 'AI Delay Prediction' },
+                          { type: #FOR_ACTION , dataAction: 'ship_email', label: 'AI Shipment Email' }]
   ShipmentId;
   @Search.defaultSearchElement: true
   @UI.lineItem: [{ position: 20, label: 'Shipment Type', importance: #HIGH }]
@@ -86,6 +87,13 @@ annotate view ZC_SHIPMENT_TRACK with
   @UI.identification: [{ position: 50, label: 'Status', importance: #HIGH }]
   @Consumption.valueHelpDefinition: [{ entity:{ name: 'ZI_STATUS_CHECK', element: 'Value' }}]
   CurrentStatus;
+  
+  
+  @UI.lineItem: [{ position: 55, label: 'Distance', importance: #HIGH }]
+  @UI.identification: [{ position: 55, label: 'Distance', importance: #HIGH }]
+  DistanceKm;
+  
+  
   @Search.defaultSearchElement: true
   @UI.dataPoint: { title: 'Delay Risk',
                  criticality: 'DelayRisk' }

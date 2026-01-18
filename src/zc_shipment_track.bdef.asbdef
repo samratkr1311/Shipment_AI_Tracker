@@ -14,6 +14,7 @@ define behavior for ZC_SHIPMENT_TRACK alias Shipment
   use action Resume;
   use action Prepare;
   use action ai_preview;
+  use action ship_email;
 
   use association _Prediction { create; with draft; }
   use association _TrackerEvent { create; with draft; }

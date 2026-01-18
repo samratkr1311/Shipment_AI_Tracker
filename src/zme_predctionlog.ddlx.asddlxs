@@ -29,11 +29,13 @@ annotate view ZC_PREDCTIONLOG with
   @UI.lineItem: [{ position: 30 }]
   @UI.identification: [{ position: 30 , label: 'Action Type'  }]
   AiActionType;
+  @UI.hidden: true
   @UI.lineItem: [{ position: 40 }]
   @UI.identification: [{ position: 40 , label: 'Snapshot'  }]
   InputSnapshot;
-  @UI.lineItem: [{ position: 50 }]
+  @UI.lineItem: [{ position: 50  }]
   @UI.identification: [{ position: 50 , label: 'Response'  }]
+  @UI.multiLineText: true
   AiResponse;
   @UI.lineItem: [{ position: 60 }]
   @UI.identification: [{ position: 60 , label: 'Called At'  }]

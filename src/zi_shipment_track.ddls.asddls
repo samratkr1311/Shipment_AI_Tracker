@@ -19,6 +19,7 @@ define root view entity ZI_SHIPMENT_TRACK
       current_status       as CurrentStatus,
       eta_days             as EtaDays,
       delay_hours          as DelayHours,
+      @UI.criticalityLabels: [{label: 'DelayRiskCrit'}]
       delay_risk           as DelayRisk,
       delay_risk_crit      as DelayRiskCrit, 
       ai_summary           as AiSummary,
