@@ -24,6 +24,8 @@ CLASS lhc_Shipment DEFINITION INHERITING FROM cl_abap_behavior_handler.
       IMPORTING keys FOR Shipment~calculate_delay_risk.
     METHODS ship_email FOR MODIFY
       IMPORTING keys FOR ACTION Shipment~ship_email.
+    METHODS before_save FOR DETERMINE ON SAVE
+      IMPORTING keys FOR Shipment~before_save.
 
     METHODS earlynumbering_create FOR NUMBERING
       IMPORTING entities FOR CREATE Shipment.
@@ -46,6 +48,8 @@ CLASS lhc_Shipment IMPLEMENTATION.
 
   METHOD earlynumbering_create.
 
+    DATA: it_ship TYPE zcl_gsheet_post_v1=>tt_types.
+
     DATA:lt_travel_tech_m TYPE TABLE FOR MAPPED EARLY zi_shipment_track,
          ls_travel_tech_m LIKE LINE OF lt_travel_tech_m.
 
@@ -65,6 +69,26 @@ CLASS lhc_Shipment IMPLEMENTATION.
           %key       = ls_entity-%key
         ) TO mapped-shipment.
       ENDIF.
+
+**GCP API CALLING.
+
+      DATA(lo_api) = NEW zcl_gsheet_post_v1( ).
+
+      "Output variables
+      DATA: lv_status_code   TYPE i,
+            lv_response_text TYPE string,
+            lv_error_text    TYPE string.
+
+      "Call method
+      lo_api->post_to_gsheet(
+        EXPORTING
+          lt_ship          = lt_need_number
+        IMPORTING
+          ev_status_code   = lv_status_code
+          ev_response_text = lv_response_text
+          ev_error_text    = lv_error_text
+      ).
+
 
     ENDLOOP.
 
@@ -652,5 +676,60 @@ CLASS lhc_Shipment IMPLEMENTATION.
 
   ENDMETHOD.
 
+
+  METHOD before_save.
+
+     "--------------------------------------------
+    " 1) Read current data from RAP buffer
+    "--------------------------------------------
+    READ ENTITIES OF zi_shipment_track IN LOCAL MODE
+      ENTITY Shipment
+      ALL FIELDS
+      WITH CORRESPONDING #( keys )
+      RESULT DATA(lt_ship).
+
+    IF lt_ship IS INITIAL.
+      RETURN.
+    ENDIF.
+
+    "--------------------------------------------
+    " 2) Call your Google Sheet API class
+    "--------------------------------------------
+    DATA(lo_api) = NEW zcl_gsheet_post_v1( ).
+
+    DATA: lv_status_code   TYPE i,
+          lv_response_text TYPE string,
+          lv_error_text    TYPE string.
+
+    lo_api->post_to_gsheet(
+      EXPORTING
+        lt_ship          = lt_ship        " <-- RAP deep table allowed (ANY TABLE)
+      IMPORTING
+        ev_status_code   = lv_status_code
+        ev_response_text = lv_response_text
+        ev_error_text    = lv_error_text
+    ).
+
+    "--------------------------------------------
+    " 3) Optional: if Google call fails, block save
+    "--------------------------------------------
+*    IF lv_error_text IS NOT INITIAL OR lv_status_code >= 400.
+*
+*      "Raise RAP error message (stops Save)
+*      APPEND VALUE #( %msg = new_message(
+*                        id       = 'ZMSG'        "your msg class
+*                        number   = '001'
+*                        v1       = lv_error_text
+*                        severity = if_abap_behv_message=>severity-error ) )
+*        TO reported-shipment.
+*
+*      "stop save
+*      failed-shipment = VALUE #( FOR ls IN keys ( %tky = ls-%tky ) ).
+*
+*      RETURN.
+*    ENDIF.
+
+
+  ENDMETHOD.
 
 ENDCLASS.

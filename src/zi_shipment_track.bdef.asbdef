@@ -29,6 +29,8 @@ early numbering
 
   determination calculate_delay_risk on modify { field DelayHours; }
 
+  determination before_save on save { create; update; }
+
 
   action ai_preview;
   action ship_email;
